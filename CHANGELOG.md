@@ -1,4 +1,7 @@
 # Changelog
+### 175.0.46 [#2761](https://github.com/openfisca/openfisca-france/pull/2761)
+
+- Correction de la valeur du paramètre TF pour les ménages avec 6 enfants dans les aides au logement.
 
 ### 175.0.43 [#2756](https://github.com/openfisca/openfisca-france/pull/2756)
 
