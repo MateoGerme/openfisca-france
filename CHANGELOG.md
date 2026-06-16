@@ -1,7 +1,28 @@
 # Changelog
+### 175.0.* []()
+
+* Évolution du système socio-fiscal.
+* Périodes concernées : à partir du 01/07/2022 pour les valeurs `R0`.
+* Zones impactées :
+    - `openfisca_france/parameters/prestations_sociales/aides_logement/allocations_logement/locatif/formule/pp_particip_perso/r0_abattement/cas_general/taux_couple.yaml`
+    - `openfisca_france/parameters/prestations_sociales/aides_logement/allocations_logement/locatif/formule/pp_particip_perso/r0_abattement/cas_general/taux_pac_supp.yaml`
+    - `openfisca_france/parameters/prestations_sociales/aides_logement/allocations_logement/locatif/formule/pp_particip_perso/r0_abattement/cas_general/taux1pac.yaml`
+    - `openfisca_france/parameters/prestations_sociales/aides_logement/allocations_logement/locatif/formule/pp_particip_perso/r0_abattement/cas_general/taux2pac.yaml`
+    - `openfisca_france/parameters/prestations_sociales/aides_logement/allocations_logement/locatif/formule/pp_particip_perso/r0_abattement/cas_general/taux3pac.yaml`
+    - `openfisca_france/parameters/prestations_sociales/aides_logement/allocations_logement/locatif/formule/pp_particip_perso/r0_abattement/cas_general/taux4pac.yaml`
+    - `openfisca_france/parameters/prestations_sociales/aides_logement/allocations_logement/locatif/formule/pp_particip_perso/r0_abattement/cas_general/taux5pac.yaml`
+    - `openfisca_france/parameters/prestations_sociales/aides_logement/allocations_logement/locatif/formule/pp_particip_perso/r0_abattement/cas_general/taux6pac.yaml`
+* Détails :
+  - Ajout des valeurs manquantes du forfait `R0` au 01/07/2022 pour le cas général.
+
+
 ### 175.0.46 [#2761](https://github.com/openfisca/openfisca-france/pull/2761)
 
-- Correction de la valeur du paramètre TF pour les ménages avec 6 enfants dans les aides au logement.
+* Évolution du système socio-fiscal.
+* Périodes concernées : à partir du 01/07/2007 pour la correction de `TF`.
+    - `openfisca_france/parameters/prestations_sociales/aides_logement/allocations_logement/locatif/formule/pp_particip_perso/tp_taux/tf_taille_famille/metropole/avec_6_enfants.yaml`
+* Détails :
+  - Correction de la valeur du paramètre `TF` pour les ménages métropolitains ayant 6 personnes à charge.
 
 ### 175.0.43 [#2756](https://github.com/openfisca/openfisca-france/pull/2756)
 
