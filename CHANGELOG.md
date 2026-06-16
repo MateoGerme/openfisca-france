@@ -3,7 +3,7 @@
 
 - Correction de la valeur du paramètre TF pour les ménages avec 6 enfants dans les aides au logement.
 
-### 175.0.43 [#2756](https://github.com/openfisca/openfisca-france/pull/2756)
+### 175.0.45 [#2756](https://github.com/openfisca/openfisca-france/pull/2756)
 
 * Évolution du système socio-fiscal.
 * Périodes concernées : 2026.
@@ -45,7 +45,7 @@
 * Détails :
   - Ajoute un `index.yaml` manquant
 
-### 175.0.41[#2757](https://github.com/openfisca/openfisca-france/pull/2757)
+### 175.0.41 [#2757](https://github.com/openfisca/openfisca-france/pull/2757)
 
 * Évolution du système socio-fiscal.
 * Périodes concernées : à partir du 01/06/2026.
@@ -97,7 +97,6 @@
   - Corrige `f8td` (suppression de la fin de validité 2014 et libellé explicite).
   - Ajoute/ajuste des tests de CEHR, incluant des cas avec lissage et sans lissage.
   - Introduit l'arrondi des montants conformément aux règles prévues à l'article 1657 du CGI
-
 
 ### 175.0.37 [#2732](https://github.com/openfisca/openfisca-france/pull/2732)
 
@@ -154,7 +153,6 @@
     - `openfisca_france/parameters/prestations_sociales/solidarite_insertion/minima_sociaux/rsa/rsa_maj/majoration_isolement_en_base_rsa/*`
     - `openfisca_france/parameters/prestations_sociales/aides_logement/allocations_logement/foyer/al/formule/l_plafonds_loyers/autres_personnes/couple.yaml`
     - `openfisca_france/parameters/prestations_sociales/solidarite_insertion/autre_solidarite/covid19/indemnite_ap/plancher.yaml`
-
 * Détails :
   - Mise à jour des `last_value_still_valid_on`, sur les paramètres dont la nouvelle valeur a pu être trouvée avec un bon niveau de fiabilité.
 
@@ -263,7 +261,7 @@
   - Par personne supplémentaire : 13.60 → 13.74 €
   - Majoration par enfant (colocataires) : 13.60 → 13.74 €
 
-### 175.0.23[#2717](https://github.com/openfisca/openfisca-france/pull/2717)
+### 175.0.23 [#2717](https://github.com/openfisca/openfisca-france/pull/2717)
 
 * Amélioration technique.
 * Périodes concernées : toutes.
@@ -272,7 +270,7 @@
   - Mise à jour de pre-commit (#2703) et flake8 (#2656)
   - Les groupes de dépendances `taxipp` et `casd-dev` sont supprimés
 
-### 175.0.22[#2700](https://github.com/openfisca/openfisca-france/pull/2710)
+### 175.0.22 [#2700](https://github.com/openfisca/openfisca-france/pull/2710)
 
 * Évolution du système socio-fiscal.
 * Périodes concernées : à partir du 01/01/2026
