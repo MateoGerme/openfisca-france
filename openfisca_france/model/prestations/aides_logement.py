@@ -96,7 +96,8 @@ class aide_logement_montant(Variable):
     def formula(famille, period):
         aide_logement_montant_brut = famille('aide_logement_montant_brut_crds', period)
         crds_logement = famille('crds_logement', period)
-        montant = round_(aide_logement_montant_brut + crds_logement, 2)
+        # Arrondi a l'euro inferieur (plancher)
+        montant = floor(aide_logement_montant_brut + crds_logement)
 
         return montant
 
