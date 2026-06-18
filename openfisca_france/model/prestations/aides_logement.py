@@ -1122,7 +1122,15 @@ class aide_logement_loyer_plafond(Variable):
             )
 
         coeff_coloc = where(coloc, plafonds_loyers_coef_chambre_coloc.coef_colocation, 1)
-        coeff_chambre = where(chambre, plafonds_loyers_coef_chambre_coloc.coef_chambre, 1)
+        coeff_chambre = where(
+            chambre,
+            where(
+                hebergement_onereux_personne_agee_ou_handicapee,
+                plafonds_loyers_coef_chambre_coloc.coef_chambre_hebergement_onereux_personne_agee_ou_handicapee,
+                plafonds_loyers_coef_chambre_coloc.coef_chambre,
+                ),
+            1,
+            )
 
         return round_(plafond * coeff_coloc * coeff_chambre, 2)
 
@@ -1396,13 +1404,20 @@ class aide_logement_taux_loyer(Variable):
             + al_plafonds_z2.majoration_par_enf_supp * (al_nb_pac > 1) * (al_nb_pac - 1)
             )
 
-        RL = L / loyer_reference
+        # RL and TL rounding follow regulatory wording:
+        # - RL is rounded to 2 decimals in percent
+        # - TL is rounded to 3 decimals in percent
+        # In decimal representation, rounding TL at 3 decimals in percent
+        # is equivalent to rounding at 5 decimals.
+        RL_pct = round_((L / loyer_reference) * 100, 2)
 
-        TL = where(RL >= al_tl_seuils.seuil_2,
-            al_tl_taux.tl_taux_3 * (RL - al_tl_seuils.seuil_2)
-            + al_tl_taux.tl_taux_2 * (al_tl_seuils.seuil_2 - al_tl_seuils.seuil_1),
-            max_(0, al_tl_taux.tl_taux_2 * (RL - al_tl_seuils.seuil_1))
+        TL_pct = where(RL_pct >= al_tl_seuils.seuil_2 * 100,
+            al_tl_taux.tl_taux_3 * (RL_pct - al_tl_seuils.seuil_2 * 100)
+            + al_tl_taux.tl_taux_2 * ((al_tl_seuils.seuil_2 - al_tl_seuils.seuil_1) * 100),
+            max_(0, al_tl_taux.tl_taux_2 * (RL_pct - al_tl_seuils.seuil_1 * 100))
             )
+        TL_pct = round_(TL_pct, 3)
+        TL = round_(TL_pct / 100, 5)
 
         return TL
 
