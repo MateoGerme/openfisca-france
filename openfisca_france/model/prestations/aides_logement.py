@@ -1264,8 +1264,9 @@ class aide_logement_R0(Variable):
         al_r0 = parameters(period).prestations_sociales.aides_logement.allocations_logement.locatif.formule.pp_particip_perso.r0_abattement
         couple = famille('al_couple', period)
         al_nb_pac = famille('al_nb_personnes_a_charge', period)
+        residence_mayotte = famille.demandeur.menage('residence_mayotte', period)
 
-        R0 = (
+        R0_cas_general = (
             al_r0.cas_general.taux_seul * not_(couple) * (al_nb_pac == 0)
             + al_r0.cas_general.taux_couple * couple * (al_nb_pac == 0)
             + al_r0.cas_general.taux1pac * (al_nb_pac == 1)
@@ -1277,7 +1278,17 @@ class aide_logement_R0(Variable):
             + al_r0.cas_general.taux_pac_supp * (al_nb_pac > 6) * (al_nb_pac - 6)
             )
 
-        return R0
+        R0_mayotte = (
+            al_r0.mayotte.taux_seul * not_(couple) * (al_nb_pac == 0)
+            + al_r0.mayotte.taux_couple * couple * (al_nb_pac == 0)
+            + al_r0.mayotte.taux1pac * (al_nb_pac == 1)
+            + al_r0.mayotte.taux2pac * (al_nb_pac == 2)
+            + al_r0.mayotte.taux3pac * (al_nb_pac == 3)
+            + al_r0.mayotte.taux4pac * (al_nb_pac == 4)
+            + al_r0.mayotte.taux5pac * (al_nb_pac == 5)
+            + al_r0.mayotte.taux6pac * (al_nb_pac >= 6)
+            )
+        return where(residence_mayotte, R0_mayotte, R0_cas_general)
 
 
 class aide_logement_taux_famille(Variable):
