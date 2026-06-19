@@ -96,10 +96,27 @@ class aide_logement_montant(Variable):
     def formula(famille, period):
         aide_logement_montant_brut = famille('aide_logement_montant_brut_crds', period)
         crds_logement = famille('crds_logement', period)
-        # Arrondi a l'euro inferieur (plancher)
-        montant = floor(aide_logement_montant_brut + crds_logement)
+        residence_saint_pierre_et_miquelon = famille.demandeur.menage('residence_saint_pierre_et_miquelon', period)
 
-        return montant
+        montant_hors_saint_pierre_et_miquelon = aide_logement_montant_brut + crds_logement
+        montant_saint_pierre_et_miquelon = aide_logement_montant_brut
+
+        montant = where(
+            residence_saint_pierre_et_miquelon,
+            montant_saint_pierre_et_miquelon,
+            montant_hors_saint_pierre_et_miquelon,
+            )
+
+        annee = period.start.year
+        coefficient_saint_pierre_et_miquelon = 1 - (2026 - annee) / 8
+        coefficient = where(
+            residence_saint_pierre_et_miquelon * (annee >= 2022) * (annee <= 2025),
+            coefficient_saint_pierre_et_miquelon,
+            1,
+            )
+
+        # Arrondi a l'euro inferieur (plancher)
+        return floor(montant * coefficient)
 
 
 class aide_logement_montant_brut_crds(Variable):
