@@ -96,10 +96,27 @@ class aide_logement_montant(Variable):
     def formula(famille, period):
         aide_logement_montant_brut = famille('aide_logement_montant_brut_crds', period)
         crds_logement = famille('crds_logement', period)
-        # Arrondi a l'euro inferieur (plancher)
-        montant = floor(aide_logement_montant_brut + crds_logement)
+        residence_saint_pierre_et_miquelon = famille.demandeur.menage('residence_saint_pierre_et_miquelon', period)
 
-        return montant
+        montant_hors_saint_pierre_et_miquelon = aide_logement_montant_brut + crds_logement
+        montant_saint_pierre_et_miquelon = aide_logement_montant_brut
+
+        montant = where(
+            residence_saint_pierre_et_miquelon,
+            montant_saint_pierre_et_miquelon,
+            montant_hors_saint_pierre_et_miquelon,
+            )
+
+        annee = period.start.year
+        coefficient_saint_pierre_et_miquelon = 1 - (2026 - annee) / 8
+        coefficient = where(
+            residence_saint_pierre_et_miquelon * (annee >= 2022) * (annee <= 2025),
+            coefficient_saint_pierre_et_miquelon,
+            1,
+            )
+
+        # Arrondi a l'euro inferieur (plancher)
+        return floor(montant * coefficient)
 
 
 class aide_logement_montant_brut_crds(Variable):
@@ -1304,6 +1321,23 @@ class aide_logement_R0(Variable):
         al_r0 = parameters(period).prestations_sociales.aides_logement.allocations_logement.locatif.formule.pp_particip_perso.r0_abattement
         couple = famille('al_couple', period)
         al_nb_pac = famille('al_nb_personnes_a_charge', period)
+
+        return (
+            al_r0.cas_general.taux_seul * not_(couple) * (al_nb_pac == 0)
+            + al_r0.cas_general.taux_couple * couple * (al_nb_pac == 0)
+            + al_r0.cas_general.taux1pac * (al_nb_pac == 1)
+            + al_r0.cas_general.taux2pac * (al_nb_pac == 2)
+            + al_r0.cas_general.taux3pac * (al_nb_pac == 3)
+            + al_r0.cas_general.taux4pac * (al_nb_pac == 4)
+            + al_r0.cas_general.taux5pac * (al_nb_pac == 5)
+            + al_r0.cas_general.taux6pac * (al_nb_pac >= 6)  # la dernière valeur est un montant additionnel à rajouter pour chaque pac au-delà de 6.
+            + al_r0.cas_general.taux_pac_supp * (al_nb_pac > 6) * (al_nb_pac - 6)
+            )
+
+    def formula_2021_01_01(famille, period, parameters):
+        al_r0 = parameters(period).prestations_sociales.aides_logement.allocations_logement.locatif.formule.pp_particip_perso.r0_abattement
+        couple = famille('al_couple', period)
+        al_nb_pac = famille('al_nb_personnes_a_charge', period)
         residence_mayotte = famille.demandeur.menage('residence_mayotte', period)
 
         R0_cas_general = (
@@ -1314,7 +1348,7 @@ class aide_logement_R0(Variable):
             + al_r0.cas_general.taux3pac * (al_nb_pac == 3)
             + al_r0.cas_general.taux4pac * (al_nb_pac == 4)
             + al_r0.cas_general.taux5pac * (al_nb_pac == 5)
-            + al_r0.cas_general.taux6pac * (al_nb_pac >= 6)  # la dernière valeur est un montant additionnel à rajouter pour chaque pac au-delà de 6.
+            + al_r0.cas_general.taux6pac * (al_nb_pac >= 6)
             + al_r0.cas_general.taux_pac_supp * (al_nb_pac > 6) * (al_nb_pac - 6)
             )
 
@@ -1329,6 +1363,23 @@ class aide_logement_R0(Variable):
             + al_r0.mayotte.taux6pac * (al_nb_pac >= 6)
             )
         return where(residence_mayotte, R0_mayotte, R0_cas_general)
+
+    def formula_2022_01_01(famille, period, parameters):
+        al_r0 = parameters(period).prestations_sociales.aides_logement.allocations_logement.locatif.formule.pp_particip_perso.r0_abattement
+        couple = famille('al_couple', period)
+        al_nb_pac = famille('al_nb_personnes_a_charge', period)
+
+        return (
+            al_r0.cas_general.taux_seul * not_(couple) * (al_nb_pac == 0)
+            + al_r0.cas_general.taux_couple * couple * (al_nb_pac == 0)
+            + al_r0.cas_general.taux1pac * (al_nb_pac == 1)
+            + al_r0.cas_general.taux2pac * (al_nb_pac == 2)
+            + al_r0.cas_general.taux3pac * (al_nb_pac == 3)
+            + al_r0.cas_general.taux4pac * (al_nb_pac == 4)
+            + al_r0.cas_general.taux5pac * (al_nb_pac == 5)
+            + al_r0.cas_general.taux6pac * (al_nb_pac >= 6)
+            + al_r0.cas_general.taux_pac_supp * (al_nb_pac > 6) * (al_nb_pac - 6)
+            )
 
 
 class aide_logement_taux_famille(Variable):
