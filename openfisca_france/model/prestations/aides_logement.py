@@ -1229,7 +1229,7 @@ class aide_logement_charges(Variable):
 
         montant_coloc = where(couple, forfait_charges_cas_colocataires.couple_sans_enfant, forfait_charges_cas_colocataires.beneficiaire_isole) + al_nb_pac * forfait_charges_cas_colocataires.majoration_par_enfant
 
-        nb_pac_dom_general = min_(al_nb_pac, 6) if period.start.date < date(2022, 7, 1) else al_nb_pac
+        nb_pac_dom_general = min_(al_nb_pac, 6) if period.start.date < date(2023, 1, 1) else al_nb_pac
         nb_pac_dom_coloc = min_(al_nb_pac, 6) if period.start.date < date(2023, 1, 1) else al_nb_pac
 
         montant_dom = forfait_charges_dom.cas_general + nb_pac_dom_general * forfait_charges_dom.majoration_par_enfant
@@ -1403,6 +1403,11 @@ class aide_logement_R0(Variable):
         al_r0 = parameters(period).prestations_sociales.aides_logement.allocations_logement.locatif.formule.pp_particip_perso.r0_abattement
         couple = famille('al_couple', period)
         al_nb_pac = famille('al_nb_personnes_a_charge', period)
+        residence_dom = famille.demandeur.menage('residence_dom', period)
+
+        nb_pac_supp = max_(al_nb_pac - 6, 0)
+        if period.start.date < date(2023, 1, 1):
+            nb_pac_supp = where(residence_dom, 0, nb_pac_supp)
 
         return (
             al_r0.cas_general.taux_seul * not_(couple) * (al_nb_pac == 0)
@@ -1413,7 +1418,7 @@ class aide_logement_R0(Variable):
             + al_r0.cas_general.taux4pac * (al_nb_pac == 4)
             + al_r0.cas_general.taux5pac * (al_nb_pac == 5)
             + al_r0.cas_general.taux6pac * (al_nb_pac >= 6)
-            + al_r0.cas_general.taux_pac_supp * (al_nb_pac > 6) * (al_nb_pac - 6)
+            + al_r0.cas_general.taux_pac_supp * nb_pac_supp
             )
 
 
