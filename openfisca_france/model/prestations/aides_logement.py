@@ -1360,6 +1360,7 @@ class aide_logement_R0(Variable):
         couple = famille('al_couple', period)
         al_nb_pac = famille('al_nb_personnes_a_charge', period)
         residence_mayotte = famille.demandeur.menage('residence_mayotte', period)
+        residence_outre_mer = famille.demandeur.menage('residence_aides_logement_outre_mer', period)
 
         R0_cas_general = (
             al_r0.cas_general.taux_seul * not_(couple) * (al_nb_pac == 0)
@@ -1383,13 +1384,21 @@ class aide_logement_R0(Variable):
             + al_r0.mayotte.taux5pac * (al_nb_pac == 5)
             + al_r0.mayotte.taux6pac * (al_nb_pac >= 6)
             )
-        return where(residence_mayotte, R0_mayotte, R0_cas_general)
+
+        R0_hors_mayotte = where(
+            residence_outre_mer * (al_nb_pac == 1),
+            al_r0.outre_mer.taux1pac,
+            R0_cas_general,
+            )
+
+        return where(residence_mayotte, R0_mayotte, R0_hors_mayotte)
 
     def formula_2021_01_01(famille, period, parameters):
         al_r0 = parameters(period).prestations_sociales.aides_logement.allocations_logement.locatif.formule.pp_particip_perso.r0_abattement
         couple = famille('al_couple', period)
         al_nb_pac = famille('al_nb_personnes_a_charge', period)
         residence_mayotte = famille.demandeur.menage('residence_mayotte', period)
+        residence_outre_mer = famille.demandeur.menage('residence_aides_logement_outre_mer', period)
 
         R0_cas_general = (
             al_r0.cas_general.taux_seul * not_(couple) * (al_nb_pac == 0)
@@ -1413,7 +1422,14 @@ class aide_logement_R0(Variable):
             + al_r0.mayotte.taux5pac * (al_nb_pac == 5)
             + al_r0.mayotte.taux6pac * (al_nb_pac >= 6)
             )
-        return where(residence_mayotte, R0_mayotte, R0_cas_general)
+
+        R0_hors_mayotte = where(
+            residence_outre_mer * (al_nb_pac == 1),
+            al_r0.outre_mer.taux1pac,
+            R0_cas_general,
+            )
+
+        return where(residence_mayotte, R0_mayotte, R0_hors_mayotte)
 
     def formula_2022_01_01(famille, period, parameters):
         al_r0 = parameters(period).prestations_sociales.aides_logement.allocations_logement.locatif.formule.pp_particip_perso.r0_abattement
