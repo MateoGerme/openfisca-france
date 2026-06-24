@@ -262,6 +262,22 @@ class logement_conventionne(Variable):
         return menage('statut_occupation_logement', period) == TypesStatutOccupationLogement.locataire_hlm
 
 
+class residence_aides_logement_outre_mer(Variable):
+    value_type = bool
+    entity = Menage
+    label = 'Le logement relève du barème outre-mer des aides au logement'
+    reference = 'https://www.legifrance.gouv.fr/loda/id/JORFTEXT000039160329'
+    definition_period = MONTH
+    set_input = set_input_dispatch_by_period
+
+    def formula(menage, period):
+        return (
+            menage('residence_dom', period)
+            + menage('residence_saint_bartelemy', period)
+            + menage('residence_saint_martin', period)
+            )
+
+
 class TypeEtatLogement(Enum):
     order__ = ' non_renseigne construction_acquisition_logement_neuf travaux_amelioration_residence_principale agrandissement_amenagement acquisition_amelioration acquisition_sans_amelioration_logement_existant amelioration'  # Needed to preserve the enum order in Python 2
     non_renseigne = 'Non renseigné'
@@ -1223,7 +1239,7 @@ class aide_logement_charges(Variable):
         couple = famille('al_couple', period)
         coloc = famille.demandeur.menage('coloc', period)
         al_nb_pac = famille('al_nb_personnes_a_charge', period)
-        residence_dom = famille.demandeur.menage('residence_dom', period)
+        residence_outre_mer = famille.demandeur.menage('residence_aides_logement_outre_mer', period)
 
         montant_cas_general = forfait_charges_cas_general.cas_general + al_nb_pac * forfait_charges_cas_general.majoration_par_enfant
 
@@ -1242,7 +1258,7 @@ class aide_logement_charges(Variable):
         montant_hors_dom = where(coloc, montant_coloc, montant_cas_general)
         montant_dom_total = where(coloc, montant_dom_coloc, montant_dom)
 
-        return where(residence_dom, montant_dom_total, montant_hors_dom)
+        return where(residence_outre_mer, montant_dom_total, montant_hors_dom)
 
 
 class aide_logement_R0(Variable):
@@ -1433,7 +1449,7 @@ class aide_logement_taux_famille(Variable):
         al_tf = parameters(period).prestations_sociales.aides_logement.allocations_logement.locatif.formule.pp_particip_perso.tp_taux.tf_taille_famille
         couple = famille('al_couple', period)
         al_nb_pac = famille('al_nb_personnes_a_charge', period)
-        residence_dom = famille.demandeur.menage('residence_dom', period)
+        residence_outre_mer = famille.demandeur.menage('residence_aides_logement_outre_mer', period)
 
         TF_metropole = (
             al_tf.metropole.personnes_isolees * (not_(couple)) * (al_nb_pac == 0)
@@ -1456,14 +1472,14 @@ class aide_logement_taux_famille(Variable):
             + al_tf.dom.avec_6_enfants * (al_nb_pac >= 6)
             )
 
-        return where(residence_dom, TF_dom, TF_metropole)
+        return where(residence_outre_mer, TF_dom, TF_metropole)
 
     def formula_2023_01_01(famille, period, parameters):
         al_tf = parameters(period).prestations_sociales.aides_logement.allocations_logement.locatif.formule.pp_particip_perso.tp_taux.tf_taille_famille
 
         couple = famille('al_couple', period)
         al_nb_pac = famille('al_nb_personnes_a_charge', period)
-        residence_dom = famille.demandeur.menage('residence_dom', period)
+        residence_outre_mer = famille.demandeur.menage('residence_aides_logement_outre_mer', period)
 
         TF_metropole = (
             al_tf.metropole.personnes_isolees * (not_(couple)) * (al_nb_pac == 0)
@@ -1490,7 +1506,7 @@ class aide_logement_taux_famille(Variable):
             + al_tf.dom.maj_par_enf_supp * (al_nb_pac > 7) * (al_nb_pac - 7)
             )
 
-        return where(residence_dom, TF_dom, TF_metropole)
+        return where(residence_outre_mer, TF_dom, TF_metropole)
 
 
 class aide_logement_loyer_reference(Variable):
