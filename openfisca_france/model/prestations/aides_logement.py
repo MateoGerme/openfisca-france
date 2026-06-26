@@ -1283,7 +1283,7 @@ class aide_logement_R0(Variable):
         couple = famille('al_couple', period)
         al_nb_pac = famille('al_nb_personnes_a_charge', period)
 
-        R0 = (
+        R0_cas_general = (
             al_r0.cas_general.taux_seul * not_(couple) * (al_nb_pac == 0)
             + al_r0.cas_general.taux_couple * couple * (al_nb_pac == 0)
             + al_r0.cas_general.taux1pac * (al_nb_pac == 1)
@@ -1295,7 +1295,23 @@ class aide_logement_R0(Variable):
             + al_r0.cas_general.taux_pac_supp * (al_nb_pac > 6) * (al_nb_pac - 6)
             )
 
-        return R0
+        if period.start.date < date(2022, 7, 1):
+            return R0_cas_general
+
+        residence_saint_pierre_et_miquelon = famille.demandeur.menage('residence_saint_pierre_et_miquelon', period)
+        R0_saint_pierre_et_miquelon = (
+            al_r0.saint_pierre_et_miquelon.taux_seul * not_(couple) * (al_nb_pac == 0)
+            + al_r0.saint_pierre_et_miquelon.taux_couple * couple * (al_nb_pac == 0)
+            + al_r0.saint_pierre_et_miquelon.taux1pac * (al_nb_pac == 1)
+            + al_r0.saint_pierre_et_miquelon.taux2pac * (al_nb_pac == 2)
+            + al_r0.saint_pierre_et_miquelon.taux3pac * (al_nb_pac == 3)
+            + al_r0.saint_pierre_et_miquelon.taux4pac * (al_nb_pac == 4)
+            + al_r0.saint_pierre_et_miquelon.taux5pac * (al_nb_pac == 5)
+            + al_r0.saint_pierre_et_miquelon.taux6pac * (al_nb_pac >= 6)
+            + al_r0.saint_pierre_et_miquelon.taux_pac_supp * (al_nb_pac > 6) * (al_nb_pac - 6)
+            )
+
+        return where(residence_saint_pierre_et_miquelon, R0_saint_pierre_et_miquelon, R0_cas_general)
 
 
 class aide_logement_taux_famille(Variable):
@@ -1468,8 +1484,9 @@ class crds_logement(Variable):
 
     def formula(famille, period, parameters):
         aide_logement_montant_brut = famille('aide_logement_montant_brut_crds', period)
+        residence_saint_pierre_et_miquelon = famille.demandeur.menage('residence_saint_pierre_et_miquelon', period)
         crds = parameters(period).prelevements_sociaux.contributions_sociales.crds
-        return -aide_logement_montant_brut * crds
+        return where(residence_saint_pierre_et_miquelon, 0, -aide_logement_montant_brut * crds)
 
 
 class TypesZoneApl(Enum):
