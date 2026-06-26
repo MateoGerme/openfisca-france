@@ -1275,6 +1275,7 @@ class aide_logement_R0(Variable):
         couple = famille('al_couple', period)
         al_nb_pac = famille('al_nb_personnes_a_charge', period)
         residence_dom = famille.demandeur.menage('residence_dom', period)
+        residence_outre_mer = famille.demandeur.menage('residence_aides_logement_outre_mer', period)
 
         n_2 = period.start.offset(-2, 'year')
         if n_2.date >= date(2009, 6, 1):
@@ -1436,6 +1437,7 @@ class aide_logement_R0(Variable):
         couple = famille('al_couple', period)
         al_nb_pac = famille('al_nb_personnes_a_charge', period)
         residence_dom = famille.demandeur.menage('residence_dom', period)
+        residence_outre_mer = famille.demandeur.menage('residence_aides_logement_outre_mer', period)
 
         nb_pac_supp = max_(al_nb_pac - 6, 0)
         if period.start.date < date(2023, 1, 1):
@@ -1453,8 +1455,14 @@ class aide_logement_R0(Variable):
             + al_r0.cas_general.taux_pac_supp * nb_pac_supp
             )
 
+        R0_hors_saint_pierre_et_miquelon = where(
+            residence_outre_mer * (al_nb_pac == 1),
+            al_r0.outre_mer.taux1pac,
+            R0_cas_general,
+            )
+
         if period.start.date < date(2022, 7, 1):
-            return R0_cas_general
+            return R0_hors_saint_pierre_et_miquelon
 
         residence_saint_pierre_et_miquelon = famille.demandeur.menage('residence_saint_pierre_et_miquelon', period)
         R0_saint_pierre_et_miquelon = (
@@ -1469,7 +1477,7 @@ class aide_logement_R0(Variable):
             + al_r0.saint_pierre_et_miquelon.taux_pac_supp * (al_nb_pac > 6) * (al_nb_pac - 6)
             )
 
-        return where(residence_saint_pierre_et_miquelon, R0_saint_pierre_et_miquelon, R0_cas_general)
+        return where(residence_saint_pierre_et_miquelon, R0_saint_pierre_et_miquelon, R0_hors_saint_pierre_et_miquelon)
 
 
 class aide_logement_taux_famille(Variable):
