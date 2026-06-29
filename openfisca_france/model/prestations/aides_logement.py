@@ -106,6 +106,7 @@ class aide_logement_montant(Variable):
             montant_saint_pierre_et_miquelon,
             montant_hors_saint_pierre_et_miquelon,
             )
+        montant_arrondi = floor(montant)
 
         annee = period.start.year
         coefficient_saint_pierre_et_miquelon = 1 - (2026 - annee) / 8
@@ -115,8 +116,10 @@ class aide_logement_montant(Variable):
             1,
             )
 
-        # Arrondi a l'euro inferieur (plancher)
-        return floor(montant * coefficient)
+        # Pour Saint-Pierre-et-Miquelon, on aligne l'ordre du calcul sur Catala :
+        # l'aide est d'abord arrondie a l'euro inferieur, puis la montee en charge
+        # est appliquee sur ce montant.
+        return floor(montant_arrondi * coefficient)
 
 
 class aide_logement_montant_brut_crds(Variable):
