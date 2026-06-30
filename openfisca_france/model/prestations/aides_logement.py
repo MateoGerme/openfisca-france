@@ -85,7 +85,6 @@ class alf(Variable):
 
         return (al_nb_pac >= 1) * not_(logement_conventionne) * not_(proprietaire_proche_famille) * aide_logement_montant
 
-
 class aide_logement_montant(Variable):
     value_type = float
     entity = Famille
@@ -95,11 +94,12 @@ class aide_logement_montant(Variable):
 
     def formula(famille, period):
         aide_logement_montant_brut = famille('aide_logement_montant_brut_crds', period)
+        aide_logement_montant_brut_arrondi_centime = floor(aide_logement_montant_brut * 100) / 100
         crds_logement = famille('crds_logement', period)
         residence_saint_pierre_et_miquelon = famille.demandeur.menage('residence_saint_pierre_et_miquelon', period)
 
-        montant_hors_saint_pierre_et_miquelon = aide_logement_montant_brut + crds_logement
-        montant_saint_pierre_et_miquelon = aide_logement_montant_brut
+        montant_hors_saint_pierre_et_miquelon = aide_logement_montant_brut_arrondi_centime + crds_logement
+        montant_saint_pierre_et_miquelon = aide_logement_montant_brut_arrondi_centime
 
         montant = where(
             residence_saint_pierre_et_miquelon,
@@ -1763,10 +1763,11 @@ class crds_logement(Variable):
 
     def formula(famille, period, parameters):
         aide_logement_montant_brut = famille('aide_logement_montant_brut_crds', period)
+        aide_logement_montant_brut_arrondi_centime = floor(aide_logement_montant_brut * 100) / 100
         residence_saint_pierre_et_miquelon = famille.demandeur.menage('residence_saint_pierre_et_miquelon', period)
         crds = parameters(period).prelevements_sociaux.contributions_sociales.crds
         # Arrondi au centime d'euro inferieur (plancher)
-        crds_arrondie = floor((aide_logement_montant_brut * crds) * 100) / 100
+        crds_arrondie = floor((aide_logement_montant_brut_arrondi_centime * crds) * 100) / 100
         return where(residence_saint_pierre_et_miquelon, 0, -crds_arrondie)
 
 
