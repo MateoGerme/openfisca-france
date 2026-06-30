@@ -18,6 +18,12 @@ from openfisca_france.model.prestations.prestations_familiales.base_ressource im
 log = logging.getLogger(__name__)
 
 
+def _centimes_stables(montant):
+    # Stabilise les flottants quand le montant est deja cense etre au centime,
+    # afin d'eviter qu'un 317.579987 soit replancher a 317.57.
+    return floor(montant * 100 + 0.5)
+
+
 class aide_logement(Variable):
     value_type = float
     entity = Famille
@@ -94,19 +100,20 @@ class aide_logement_montant(Variable):
 
     def formula(famille, period):
         aide_logement_montant_brut = famille('aide_logement_montant_brut_crds', period)
-        aide_logement_montant_brut_arrondi_centime = floor(aide_logement_montant_brut * 100) / 100
+        aide_logement_montant_brut_centimes = _centimes_stables(aide_logement_montant_brut)
         crds_logement = famille('crds_logement', period)
+        crds_logement_centimes = _centimes_stables(-crds_logement)
         residence_saint_pierre_et_miquelon = famille.demandeur.menage('residence_saint_pierre_et_miquelon', period)
 
-        montant_hors_saint_pierre_et_miquelon = aide_logement_montant_brut_arrondi_centime + crds_logement
-        montant_saint_pierre_et_miquelon = aide_logement_montant_brut_arrondi_centime
+        montant_hors_saint_pierre_et_miquelon_centimes = aide_logement_montant_brut_centimes - crds_logement_centimes
+        montant_saint_pierre_et_miquelon_centimes = aide_logement_montant_brut_centimes
 
-        montant = where(
+        montant_centimes = where(
             residence_saint_pierre_et_miquelon,
-            montant_saint_pierre_et_miquelon,
-            montant_hors_saint_pierre_et_miquelon,
+            montant_saint_pierre_et_miquelon_centimes,
+            montant_hors_saint_pierre_et_miquelon_centimes,
             )
-        montant_arrondi = floor(montant)
+        montant_arrondi = floor(montant_centimes / 100)
 
         annee = period.start.year
         coefficient_saint_pierre_et_miquelon = 1 - (2026 - annee) / 8
@@ -1763,11 +1770,11 @@ class crds_logement(Variable):
 
     def formula(famille, period, parameters):
         aide_logement_montant_brut = famille('aide_logement_montant_brut_crds', period)
-        aide_logement_montant_brut_arrondi_centime = floor(aide_logement_montant_brut * 100) / 100
+        aide_logement_montant_brut_centimes = _centimes_stables(aide_logement_montant_brut)
         residence_saint_pierre_et_miquelon = famille.demandeur.menage('residence_saint_pierre_et_miquelon', period)
         crds = parameters(period).prelevements_sociaux.contributions_sociales.crds
         # Arrondi au centime d'euro inferieur (plancher)
-        crds_arrondie = floor((aide_logement_montant_brut_arrondi_centime * crds) * 100) / 100
+        crds_arrondie = floor(aide_logement_montant_brut_centimes * crds) / 100
         return where(residence_saint_pierre_et_miquelon, 0, -crds_arrondie)
 
 
