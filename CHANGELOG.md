@@ -1,5 +1,14 @@
 # Changelog
 
+### 176.0.8 [#2796](https://github.com/openfisca/openfisca-france/pull/2796)
+
+* Évolution du système socio-fiscal.
+* Périodes concernées : à partir du 01/08/2026
+* Zones impactées :
+  - `openfisca_france/parameters/taxation_capital/epargne/livret_a/taux.yaml`
+* Détails :
+  - Mise à jour du taux d'intérêts du livret A
+
 ### 176.0.7 [#2712](https://github.com/openfisca/openfisca-france/pull/2712)
 
 * Évolution du système socio-fiscal.
