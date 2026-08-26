@@ -1854,9 +1854,10 @@ class TypesZoneApl(Enum):
     zone_3 = 'Zone 3'
 
 
-zone_apl_by_depcom = None
+zone_apl_by_depcom = {"75056": 1, "97100" : 2, "97200": 2, "97300" : 2, "97400" : 2, "97500" : 2, "97600" : 2, "97700" : 2, "97800" : 2, "97400" : 2, "97700" : 2, "39441" : 3, "69123" : 2, "91377" : 1}
 
-
+# FIXME: zonage csv does not take into account all DROM-COM (Saint Martin, ...)
+# For now, we "cheat" with a partial zonage which might help to simplifying fuzzing too. This is in sink with the depcom we use in our fuzzing pipelines
 def preload_zone_apl():
     global zone_apl_by_depcom
     if zone_apl_by_depcom is None:
