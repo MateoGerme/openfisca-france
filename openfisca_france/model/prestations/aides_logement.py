@@ -1149,7 +1149,7 @@ class aide_logement_loyer_plafond(Variable):
         couple = famille('al_couple', period)
         coloc = famille.demandeur.menage('coloc', period)
         chambre = famille.demandeur.menage('logement_chambre', period)
-        residence_dom = famille.demandeur.menage('residence_dom', period)
+        residence_aides_logement_outre_mer = famille.demandeur.menage('residence_aides_logement_outre_mer', period)
         hebergement_onereux_personne_agee_ou_handicapee = famille.demandeur.menage(
             'hebergement_onereux_personne_agee_ou_handicapee', period
             )
@@ -1161,9 +1161,9 @@ class aide_logement_loyer_plafond(Variable):
 
         plafond_personne_seule = plafonds_loyers_par_zone.personnes_seules
         plafond_couple = plafonds_loyers_par_zone.couples
-        limitation_six_pac_dom = residence_dom * (period.start.year < 2023)
+        limitation_six_pac_outre_mer = residence_aides_logement_outre_mer * (period.start.year < 2023)
         al_nb_pac_plafond = where(
-            limitation_six_pac_dom,
+            limitation_six_pac_outre_mer,
             min_(al_nb_pac, 6),
             al_nb_pac,
             )
