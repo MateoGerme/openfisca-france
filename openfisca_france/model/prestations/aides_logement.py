@@ -1643,14 +1643,14 @@ class aide_logement_loyer_reference(Variable):
 
         couple = famille('al_couple', period)
         al_nb_pac = famille('al_nb_personnes_a_charge', period)
-        residence_dom = famille.demandeur.menage('residence_dom', period)
-        limitation_six_pac_dom = residence_dom * (period.start.year < 2023)
+        residence_outre_mer = famille.demandeur.menage('residence_aides_logement_outre_mer', period)
+        limitation_six_pac_outre_mer = residence_outre_mer * (period.start.year < 2023)
         al_nb_pac_reference = where(
-            limitation_six_pac_dom,
+            limitation_six_pac_outre_mer,
             min_(al_nb_pac, 6),
             al_nb_pac,
             )
-
+        
         return (
             al_plafonds_z2.personnes_seules * (not_(couple)) * (al_nb_pac == 0)
             + al_plafonds_z2.couples * (couple) * (al_nb_pac == 0)
