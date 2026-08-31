@@ -101,6 +101,17 @@ class aide_logement_montant(Variable):
         # Décret n° 2021-1750 du 21 décembre 2021, art. 7
         # https://www.legifrance.gouv.fr/loda/article_lc/LEGIARTI000044608297/2021-12-24
         residence_saint_pierre_et_miquelon = famille.demandeur.menage('residence_saint_pierre_et_miquelon', period)
+
+        montant_hors_saint_pierre_et_miquelon = aide_logement_montant_brut + crds_logement
+        montant_saint_pierre_et_miquelon = aide_logement_montant_brut
+
+        montant = where(
+            residence_saint_pierre_et_miquelon,
+            montant_saint_pierre_et_miquelon,
+            montant_hors_saint_pierre_et_miquelon,
+            )
+        montant_arrondi = floor(montant)
+
         annee = period.start.year
         coefficient_saint_pierre_et_miquelon = 1 - (2026 - annee) / 8
         coefficient = where(
@@ -111,9 +122,9 @@ class aide_logement_montant(Variable):
 
         montant = aide_logement_montant_brut * coefficient
 
-        return round_(montant + crds_logement, 2)
+        return floor(montant_arrondi * coefficient)
 
-
+    
 class aide_logement_montant_brut_crds(Variable):
     value_type = float
     entity = Famille
