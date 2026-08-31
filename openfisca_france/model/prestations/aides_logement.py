@@ -1604,6 +1604,8 @@ class aide_logement_taux_loyer(Variable):
     label = 'Taux basé sur une comparaison du loyer retenu à un loyer de référence.'
     definition_period = MONTH
     set_input = set_input_dispatch_by_period
+    reference = ['https://www.legifrance.gouv.fr/loda/article_lc/LEGIARTI000044137420/2022-01-01'] # arrondi
+
 
     def formula(famille, period, parameters):
         al_locatif = parameters(period).prestations_sociales.aides_logement.allocations_logement.locatif
@@ -1639,7 +1641,7 @@ class aide_logement_taux_loyer(Variable):
             max_(0, al_tl_taux.tl_taux_2 * (RL - al_tl_seuils.seuil_1))
             )
 
-        return TL
+        return round_(TL * 100000) / 100000
 
 
 class aide_logement_ressources_apres_abattement(Variable):
