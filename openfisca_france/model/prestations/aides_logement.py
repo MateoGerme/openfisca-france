@@ -124,7 +124,7 @@ class aide_logement_montant(Variable):
 
         return floor(montant_arrondi * coefficient)
 
-    
+
 class aide_logement_montant_brut_crds(Variable):
     value_type = float
     entity = Famille
@@ -1558,7 +1558,7 @@ class aide_logement_rapport_loyers_arrondi_pourcent(Variable):
     label = 'Rapport entre le loyer retenu et le loyer de référence, arrondi en pourcentage'
     definition_period = MONTH
     set_input = set_input_dispatch_by_period
-    reference = ['https://www.legifrance.gouv.fr/loda/article_lc/LEGIARTI000044137420/2022-01-01'] # arrondi
+    reference = ['https://www.legifrance.gouv.fr/loda/article_lc/LEGIARTI000044137420/2022-01-01']  # arrondi
 
     def formula(famille, period):
         rapport_loyers = famille('aide_logement_rapport_loyers', period)
@@ -1595,41 +1595,19 @@ class aide_logement_taux_loyer_formule(Variable):
         return TL_pct / 100
 
 
-
 class aide_logement_taux_loyer(Variable):
     value_type = float
     entity = Famille
     label = 'Taux basé sur une comparaison du loyer retenu à un loyer de référence.'
     definition_period = MONTH
     set_input = set_input_dispatch_by_period
-    reference = ['https://www.legifrance.gouv.fr/loda/article_lc/LEGIARTI000044137420/2022-01-01'] # arrondi
-
+    reference = ['https://www.legifrance.gouv.fr/loda/article_lc/LEGIARTI000044137420/2022-01-01']  # arrondi
 
     def formula(famille, period, parameters):
         al_locatif = parameters(period).prestations_sociales.aides_logement.allocations_logement.locatif
 
-        al_plafonds_z2 = al_locatif.formule.l_plafonds_loyers.par_zone.zone_2
-
         al_tl_seuils = al_locatif.formule.pp_particip_perso.tp_taux.tl_loyer.seuils
         al_tl_taux = al_locatif.formule.pp_particip_perso.tp_taux.tl_loyer.taux
-
-        L = famille('aide_logement_loyer_retenu', period)
-        couple = famille('al_couple', period)
-        al_nb_pac = famille('al_nb_personnes_a_charge', period)
-        residence_dom = famille.demandeur.menage('residence_dom', period)
-        limitation_six_pac_dom = residence_dom * (period.start.year < 2023)
-        al_nb_pac_reference = where(
-            limitation_six_pac_dom,
-            min_(al_nb_pac, 6),
-            al_nb_pac,
-            )
-
-        loyer_reference = (
-            al_plafonds_z2.personnes_seules * (not_(couple)) * (al_nb_pac == 0)
-            + al_plafonds_z2.couples * (couple) * (al_nb_pac == 0)
-            + al_plafonds_z2.un_enfant * (al_nb_pac >= 1)
-            + al_plafonds_z2.majoration_par_enf_supp * (al_nb_pac_reference > 1) * (al_nb_pac_reference - 1)
-            )
 
         RL = famille('aide_logement_rapport_loyers_arrondi_pourcent', period) / 100
 
@@ -1762,7 +1740,8 @@ class TypesZoneApl(Enum):
     zone_3 = 'Zone 3'
 
 
-zone_apl_by_depcom = {"75056": 1, "97100" : 2, "97200": 2, "97300" : 2, "97400" : 2, "97500" : 2, "97600" : 2, "97700" : 2, "97800" : 2, "97400" : 2, "97700" : 2, "39441" : 3, "69123" : 2, "91377" : 1}
+zone_apl_by_depcom = {'75056': 1, '97100': 2, '97200': 2, '97300': 2, '97400': 2, '97500': 2, '97600': 2, '97700': 2, '97800': 2, '97400': 2, '97700': 2, '39441': 3, '69123': 2, '91377': 1}
+
 
 # FIXME: zonage csv does not take into account all DROM-COM (Saint Martin, ...)
 # For now, we "cheat" with a partial zonage which might help to simplifying fuzzing too. This is in sink with the depcom we use in our fuzzing pipelines
