@@ -213,7 +213,6 @@ class aide_logement_montant_selectionne_avant_seuil(Variable):
 
         montant_accedant_et_foyer = famille('aides_logement_accedant_et_foyer', period)
         montant_locataire = max_(0, loyer_retenu + charges_retenues - participation_personnelle)
-
         return select([locataire, accedant + locataire_logement_foyer + logement_crous],
                       [montant_locataire, montant_accedant_et_foyer])
 
@@ -1183,7 +1182,6 @@ class aide_logement_loyer_plafond(Variable):
              plafonds_loyers_coef_chambre_coloc.coef_chambre),
             default = 1
             )
-
         return round_(plafond * coeff_coloc * coeff_chambre, 2)
 
 
@@ -1531,7 +1529,7 @@ class aide_logement_loyer_reference(Variable):
         couple = famille('al_couple', period)
         al_nb_pac = famille('al_nb_personnes_a_charge', period)
         residence_outre_mer = famille.demandeur.menage('residence_aides_logement_outre_mer', period)
-        al_nb_pac_reference = where(residence_outre_mer, min_(al_nb_pac, 6), al_nb_pac)
+        al_nb_pac_reference = where(residence_outre_mer * (period.start.year < 2023), min_(al_nb_pac, 6), al_nb_pac)
 
         return (
             al_plafonds_z2.personnes_seules * (not_(couple)) * (al_nb_pac == 0)
@@ -1654,7 +1652,6 @@ class aide_logement_ressources_apres_abattement(Variable):
     def formula(famille, period):
         ressources = famille('aide_logement_base_ressources', period)
         abattement = famille('aide_logement_R0', period)
-
         return max_(0, ressources - abattement)
 
 
@@ -1698,7 +1695,6 @@ class aide_logement_participation_ressources(Variable):
     def formula(famille, period):
         ressources_apres_abattement = famille('aide_logement_ressources_apres_abattement', period)
         taux_participation = famille('aide_logement_taux_participation_personnelle', period)
-
         return taux_participation * ressources_apres_abattement
 
 
@@ -1712,7 +1708,6 @@ class aide_logement_participation_personnelle(Variable):
     def formula(famille, period):
         participation_minimale = famille('aide_logement_participation_minimale', period)
         participation_ressources = famille('aide_logement_participation_ressources', period)
-
         return participation_minimale + participation_ressources
 
 
