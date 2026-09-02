@@ -18,12 +18,6 @@ from openfisca_france.model.prestations.prestations_familiales.base_ressource im
 log = logging.getLogger(__name__)
 
 
-def _centimes_stables(montant):
-    # Stabilise les flottants quand le montant est deja cense etre au centime,
-    # afin d'eviter qu'un 317.579987 soit replancher a 317.57.
-    return floor(montant * 100 + 0.5)
-
-
 class aide_logement(Variable):
     value_type = float
     entity = Famille
@@ -98,29 +92,25 @@ class aide_logement_montant(Variable):
     label = 'Montant des aides au logement net de CRDS'
     definition_period = MONTH
     set_input = set_input_divide_by_period
-    reference = 'https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000038878905'
 
     def formula(famille, period):
         aide_logement_montant_brut = famille('aide_logement_montant_brut_crds', period)
-        aide_logement_montant_brut_centimes = _centimes_stables(aide_logement_montant_brut)
         crds_logement = famille('crds_logement', period)
-        crds_logement_centimes = _centimes_stables(crds_logement)
 
         # De 2022 à 2025, l'AL à Saint-Pierre-et-Miquelon s'aligne progressivement sur les montants en vigueur en métropole
         # Décret n° 2021-1750 du 21 décembre 2021, art. 7
         # https://www.legifrance.gouv.fr/loda/article_lc/LEGIARTI000044608297/2021-12-24
         residence_saint_pierre_et_miquelon = famille.demandeur.menage('residence_saint_pierre_et_miquelon', period)
 
-        montant_hors_saint_pierre_et_miquelon_centimes = aide_logement_montant_brut_centimes + crds_logement_centimes
-        montant_saint_pierre_et_miquelon_centimes = aide_logement_montant_brut_centimes
+        montant_hors_saint_pierre_et_miquelon = aide_logement_montant_brut + crds_logement
+        montant_saint_pierre_et_miquelon = aide_logement_montant_brut
 
-        montant_centimes = where(
+        montant = where(
             residence_saint_pierre_et_miquelon,
-            montant_saint_pierre_et_miquelon_centimes,
-            montant_hors_saint_pierre_et_miquelon_centimes,
+            montant_saint_pierre_et_miquelon,
+            montant_hors_saint_pierre_et_miquelon,
             )
-        # Le montant net de CRDS est arrondi à l'euro inférieur
-        montant_arrondi = floor(montant_centimes / 100)
+        montant_arrondi = floor(montant)
 
         annee = period.start.year
         coefficient_saint_pierre_et_miquelon = 1 - (2026 - annee) / 8
@@ -129,6 +119,8 @@ class aide_logement_montant(Variable):
             coefficient_saint_pierre_et_miquelon,
             1,
             )
+
+        montant = aide_logement_montant_brut * coefficient
 
         return floor(montant_arrondi * coefficient)
 
@@ -1733,16 +1725,10 @@ class crds_logement(Variable):
 
     def formula(famille, period, parameters):
         aide_logement_montant_brut = famille('aide_logement_montant_brut_crds', period)
-        aide_logement_montant_brut_centimes = _centimes_stables(aide_logement_montant_brut)
-        crds = parameters(period).prelevements_sociaux.contributions_sociales.crds
-
-        # La CRDS est arrondie au centime d'euro inférieur
-        # https://www.ecologie.gouv.fr/sites/default/files/documents/Brochure-bareme-2024-APL.pdf (p59)
-        crds_arrondie = floor(aide_logement_montant_brut_centimes * crds) / 100
-
-        # La CRDS n'est pas applicable à Saint-Pierre-et-Miquelon
-        # https://www.services-fiscaux975.fr/fr/38.html
         residence_saint_pierre_et_miquelon = famille.demandeur.menage('residence_saint_pierre_et_miquelon', period)
+        crds = parameters(period).prelevements_sociaux.contributions_sociales.crds
+        # Arrondi au centime d'euro inferieur (plancher)
+        crds_arrondie = floor((aide_logement_montant_brut * crds) * 100) / 100
         return where(residence_saint_pierre_et_miquelon, 0, -crds_arrondie)
 
 
