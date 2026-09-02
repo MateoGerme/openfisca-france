@@ -104,13 +104,14 @@ class aide_logement_montant(Variable):
         aide_logement_montant_brut = famille('aide_logement_montant_brut_crds', period)
         aide_logement_montant_brut_centimes = _centimes_stables(aide_logement_montant_brut)
         crds_logement = famille('crds_logement', period)
+        crds_logement_centimes = _centimes_stables(crds_logement)
 
         # De 2022 à 2025, l'AL à Saint-Pierre-et-Miquelon s'aligne progressivement sur les montants en vigueur en métropole
         # Décret n° 2021-1750 du 21 décembre 2021, art. 7
         # https://www.legifrance.gouv.fr/loda/article_lc/LEGIARTI000044608297/2021-12-24
         residence_saint_pierre_et_miquelon = famille.demandeur.menage('residence_saint_pierre_et_miquelon', period)
 
-        montant_hors_saint_pierre_et_miquelon_centimes = aide_logement_montant_brut_centimes + crds_logement
+        montant_hors_saint_pierre_et_miquelon_centimes = aide_logement_montant_brut_centimes + crds_logement_centimes
         montant_saint_pierre_et_miquelon_centimes = aide_logement_montant_brut_centimes
 
         montant_centimes = where(
