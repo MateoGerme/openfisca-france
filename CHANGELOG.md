@@ -1,5 +1,11 @@
 # Changelog
 
+### 177.0.3 [#XXXX](https://github.com/openfisca/openfisca-france/pull/XXXX)
+
+* Évolution du système socio-fiscal.
+* Zones impactées : `prestations/aides_logement`.
+* Supprime l’arrondi intermédiaire du montant brut de l’aide au logement.
+
 ### 177.0.2 [#XXXX](https://github.com/openfisca/openfisca-france/pull/XXXX)
 
 * Évolution du système socio-fiscal.

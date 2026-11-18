@@ -173,7 +173,7 @@ class aide_logement_montant_brut(Variable):
         exception = accedant + locataire_foyer + handicap
         coeff = where(exception, 1, coeff)
 
-        montant_avant_degressivite_et_coeff = round_(montant_avant_degressivite * coeff, 2)
+        montant_avant_degressivite_et_coeff = montant_avant_degressivite * coeff
 
         minoration_forfaitaire = parameters(period).prestations_sociales.aides_logement.allocations_logement.locatif.minoration_forfaitaire
 
