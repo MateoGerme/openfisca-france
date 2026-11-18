@@ -1,5 +1,11 @@
 # Changelog
 
+### 177.0.5 [#XXXX](https://github.com/openfisca/openfisca-france/pull/XXXX)
+
+* Évolution du système socio-fiscal.
+* Zones impactées : `prestations/aides_logement`.
+* Conserve le forfait de charges en double précision avant l’arrondi de l’aide à l’euro inférieur.
+
 ### 177.0.4 [#XXXX](https://github.com/openfisca/openfisca-france/pull/XXXX)
 
 * Évolution du système socio-fiscal.
